@@ -1,4 +1,5 @@
 const draw = ()=>{
+
     context.setTransform(1,0,0,1,0,0);
 
     context.clearRect(0,0,canvas.width,canvas.height)
@@ -8,14 +9,15 @@ const draw = ()=>{
 
     context.translate(camX,camY)
 
+
     players.forEach(p=>{
         if(!p.playerData){
             return 
         }
         context.beginPath()
         context.fillStyle = p.playerData.color;
-        context.arc(p.playerData.locX,p.playerData.locY,p.playerData.radius,0,Math.PI*2) //draw an arc/circle
-
+        context.arc(p.playerData.locX,p.playerData.locY,p.playerData.radius,0,Math.PI*2)
+     
         context.fill();
         context.lineWidth = 3;
         context.strokeStyle = 'rgb(0,255,0)'
@@ -28,7 +30,6 @@ const draw = ()=>{
         context.arc(orb.locX,orb.locY,orb.radius,0,Math.PI*2);
         context.fill();
     })
-
     requestAnimationFrame(draw); 
 }
 
