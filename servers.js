@@ -3,7 +3,7 @@ const socketio = require("socket.io");
 
 const app = express();
 
-app.use(express.static(__dirname + "/public"));
+app.use(express.static("./public"));
 
 const server = app.listen(5000, () => {
   console.log("Server is running on port: http://localhost:5000");
