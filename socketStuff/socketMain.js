@@ -1,5 +1,9 @@
 const io = require("../servers").io;
 const app = require("../servers").app;
+const checkForOrbCollisions =
+  require("./checkCollisions").checkForOrbCollisions;
+const checkForPlayerCollisions =
+  require("./checkCollisions").checkForPlayerCollisions;
 
 const Player = require("./classes/Player");
 const PlayerConfig = require("./classes/PlayerConfig");
@@ -17,7 +21,7 @@ const settings = {
   defaultGenericOrbSize: 5,
 };
 const players = [];
-
+const playersForUsers = [];
 let tickTockInterval;
 
 initGame();
@@ -38,13 +42,12 @@ io.on("connection", (socket) => {
     const playerData = new PlayerData(playerName, settings);
     player = new Player(socket.id, playerConfig, playerData);
     players.push(player);
+    playersForUsers.push({ playerData });
 
-    ackCallback(orbs);
+    ackCallback({ orbs, indexInPlayers: playersForUsers.length - 1 });
   });
 
   socket.on("tock", (data) => {
-    //a tock has come in before the player is set up.
-    //this is because the client kept tocking after disconnect
     if (!player.playerConfig) {
       return;
     }
@@ -52,51 +55,17 @@ io.on("connection", (socket) => {
     const xV = (player.playerConfig.xVector = data.xVector);
     const yV = (player.playerConfig.yVector = data.yVector);
 
-    //if player can move in the x, move
     if (
       (player.playerData.locX > 5 && xV < 0) ||
       (player.playerData.locX < settings.worldWidth && xV > 0)
     ) {
       player.playerData.locX += speed * xV;
     }
-    //if player can move in the y, move
     if (
       (player.playerData.locY > 5 && yV > 0) ||
       (player.playerData.locY < settings.worldHeight && yV < 0)
     ) {
       player.playerData.locY -= speed * yV;
-    }
-
-    //check for the tocking player to hit orbs
-    const capturedOrbI = checkForOrbCollisions(
-      player.playerData,
-      player.playerConfig,
-      orbs,
-      settings,
-    );
-
-    if (capturedOrbI !== null) {
-      orbs.splice(capturedOrbI, 1, new Orb(settings));
-
-      const orbData = {
-        capturedOrbI,
-        newOrb: orbs[capturedOrbI],
-      };
-
-      io.to("game").emit("orbSwitch", orbData);
-      io.to("game").emit("updateLeaderBoard", getLeaderBoard());
-    }
-
-    const absorbData = checkForPlayerCollisions(
-      player.playerData,
-      player.playerConfig,
-      players,
-      playersForUsers,
-      socket.id,
-    );
-    if (absorbData) {
-      io.to("game").emit("playerAbsorbed", absorbData);
-      io.to("game").emit("updateLeaderBoard", getLeaderBoard());
     }
   });
 

@@ -11,12 +11,8 @@ const init = async () => {
       yVector: player.yVector ? player.yVector : 0.1,
     });
   }, 33);
-
   orbs = initData.orbs;
   player.indexInPlayers = initData.indexInPlayers;
-
-  orbs = initData;
-
   draw();
 };
 
