@@ -1,6 +1,12 @@
 const io = require("../servers").io;
 const app = require("../servers").app;
 
+const Player = require("./classes/Player");
+const PlayerConfig = require("./classes/PlayerConfig");
+const PlayerData = require("./classes/PlayerData");
+const Orb = require("./classes/Orb");
+
+const orbs = [];
 const settings = {
   defaultNumberOfOrbs: 5000,
   defaultSpeed: 6,
@@ -10,16 +16,19 @@ const settings = {
   worldHeight: 5000,
   defaultGenericOrbSize: 5,
 };
-
-const Orb = require("./classes/Orb");
-
-const orbs = [];
+const players = [];
 
 initGame();
 
 io.on("connection", (socket) => {
-  socket.emit("init", {
-    orbs,
+  socket.on("init", (playerObj, ackCallback) => {
+    const playerName = playerObj.playerName;
+    const playerConfig = new PlayerConfig(settings);
+    const playerData = new PlayerData(playerName, settings);
+    const player = new Player(socket.id, playerConfig, playerData);
+    players.push(player);
+
+    ackCallback(orbs);
   });
 });
 
