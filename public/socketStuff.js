@@ -11,4 +11,6 @@ const init = async () => {
   draw();
 };
 
-socket.on("initReturn", (initData) => {});
+socket.on("tick", (players) => {
+  console.log(players);
+});
